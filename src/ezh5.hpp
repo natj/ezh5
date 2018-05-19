@@ -72,6 +72,11 @@ namespace ezh5{
 		};
 
 		template<>
+		struct is_scalar<unsigned long long>{
+			static const bool value = true;
+		};
+
+		template<>
 		struct is_scalar<float>{
 			static const bool value = true;
 		};
@@ -168,11 +173,14 @@ namespace ezh5{
 		H5Sclose(dp_id);
 		return err_id;
 	}
+    
 	/// string dsname
 	template<typename T>
 	hid_t write(hid_t loc_id, const std::string& dsname, const std::vector<T>& vec){
 		return write(loc_id, dsname.c_str(), vec);
 	}
+
+
 
 #ifdef _BOOST_UBLAS_VECTOR_
 	/// char* dsname
@@ -272,6 +280,7 @@ namespace ezh5{
 	template<> hid_t TypeMem<long>::id = H5T_NATIVE_LONG;
 	template<> hid_t TypeMem<unsigned int>::id = H5T_NATIVE_UINT;
 	template<> hid_t TypeMem<unsigned long>::id = H5T_NATIVE_ULONG;
+	template<> hid_t TypeMem<unsigned long long>::id = H5T_NATIVE_ULLONG;
 
 	// hid_t TypeMem<const char*>::id =  H5Tcopy(H5T_C_S1);
 
