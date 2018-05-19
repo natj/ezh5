@@ -30,7 +30,9 @@
 #include <complex>
 #include <string>
 #include <vector>
+#include <array>
 #include <cassert>
+#include <iostream>
 
 
 namespace ezh5{
@@ -178,6 +180,29 @@ namespace ezh5{
 	template<typename T>
 	hid_t write(hid_t loc_id, const std::string& dsname, const std::vector<T>& vec){
 		return write(loc_id, dsname.c_str(), vec);
+	}
+
+	/// write std::array to hdf5
+	/// char* dsname
+	template<typename T, size_t D>
+	hid_t write(hid_t loc_id, const char* dsname, const std::array<T, D>& arr){
+		hsize_t dims[1];
+		dims[0] = arr.size();
+		//std::cout<<dsname<<std::endl;
+		hid_t dp_id = H5Screate_simple(1, dims, NULL);
+		assert(dp_id>=0);
+		hid_t ds_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dp_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		assert(ds_id>=0);
+		hid_t err_id = H5Dwrite(ds_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &arr[0]);
+		H5Dclose(ds_id);
+		H5Sclose(dp_id);
+		return err_id;
+	}
+    
+	/// string dsname
+	template<typename T, size_t D>
+	hid_t write(hid_t loc_id, const std::string& dsname, const std::array<T, D>& arr){
+		return write(loc_id, dsname.c_str(), arr);
 	}
 
 
@@ -401,6 +426,33 @@ namespace ezh5{
 										 H5P_DEFAULT);
 					assert(this->id >=0);
 					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec[0]);
+					assert(error_id>=0);
+					H5Dclose(this->id);
+					H5Sclose(dataspace_id);
+					this->id = -1;
+				}else{
+					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
+				}
+			}
+			return *this;
+		}
+
+		/// write std::array
+		template<typename T, size_t D>
+		Node& operator=(const std::array<T, D>& arr){
+			if(this->id == -1){
+				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
+				if (is_exist<0){
+					assert(false);
+				}else if (is_exist==false) {
+					hsize_t dims[1];
+					dims[0] = arr.size();
+					hid_t dataspace_id = H5Screate_simple(1, dims, NULL);
+					assert(dataspace_id >= 0);
+					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
+										 H5P_DEFAULT);
+					assert(this->id >=0);
+					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &arr[0]);
 					assert(error_id>=0);
 					H5Dclose(this->id);
 					H5Sclose(dataspace_id);
