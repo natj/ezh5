@@ -326,8 +326,8 @@ namespace ezh5{
 
 	class ID { // the base class for Node
 	public:
-		hid_t id;
-		ID(): id(-1){}
+		hid_t id{-1};
+		ID() {}
 		ID(hid_t id_in) : id(id_in){}
 
 		~ID()= default;
