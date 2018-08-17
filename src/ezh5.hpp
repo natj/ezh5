@@ -359,7 +359,7 @@ namespace ezh5{
 				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
 				if (is_exist<0){
 					assert(false);
-				}else if (is_exist==false){
+				}else if (!static_cast<bool>(is_exist)){
 					this->id = H5Gcreate2(pid, path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 				}else{
 					this->id = H5Gopen(pid, path.c_str(), H5P_DEFAULT);
@@ -394,7 +394,7 @@ namespace ezh5{
 				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
 				if (is_exist<0){
 					assert(false);
-				}else if (is_exist==false) {
+				}else if (!static_cast<bool>(is_exist)) {
 					dataspace_id = H5Screate(H5S_SCALAR);
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
@@ -419,7 +419,7 @@ namespace ezh5{
 				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
 				if (is_exist<0){
 					assert(false);
-				}else if (is_exist==false) {
+				}else if (!static_cast<bool>(is_exist)) {
 					hsize_t dims[1];
 					dims[0] = vec.size();
 					hid_t dataspace_id = H5Screate_simple(1, dims, nullptr);
@@ -446,7 +446,7 @@ namespace ezh5{
 				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
 				if (is_exist<0){
 					assert(false);
-				}else if (is_exist==false) {
+				}else if (!static_cast<bool>(is_exist)) {
 					hsize_t dims[1];
 					dims[0] = arr.size();
 					hid_t dataspace_id = H5Screate_simple(1, dims, nullptr);
