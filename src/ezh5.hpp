@@ -624,7 +624,7 @@ namespace ezh5{
 	};
 
 
-	Node& Node::operator=(const char* str){
+	inline Node& Node::operator=(const char* str){
 		hid_t type_in_file = H5Tcopy(H5T_FORTRAN_S1);
 		H5Tset_size(type_in_file, H5T_VARIABLE);
 		hid_t type_in_mem = H5Tcopy(H5T_C_S1);
@@ -648,7 +648,7 @@ namespace ezh5{
 	}
 
 
-	Node& Node::operator=(const std::string& str){
+	inline Node& Node::operator=(const std::string& str){
 		return operator=(str.c_str());
 	}
 
@@ -691,7 +691,7 @@ namespace ezh5{
 
 #include <iostream>
 namespace ezh5 {
-	std::string& operator<<(std::string& str, ezh5::Node& node){ // TODO: doesn't work, maybe because the file string type is H5T_S_C
+	inline std::string& operator<<(std::string& str, ezh5::Node& node){ // TODO: doesn't work, maybe because the file string type is H5T_S_C
         hid_t dataset_id = H5Dopen2(node.pid, node.path.c_str(), H5P_DEFAULT); assert(dataset_id>=0);
         hid_t datatype_id = H5Dget_type(dataset_id); assert(datatype_id>=0);
         std::size_t sdim = H5Tget_size(datatype_id);
