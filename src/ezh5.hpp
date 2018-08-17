@@ -29,6 +29,7 @@
 
 #include <complex>
 #include <string>
+#include <utility>
 #include <vector>
 #include <array>
 #include <cassert>
@@ -340,10 +341,10 @@ namespace ezh5{
 
 		Node()= default;
 
-		Node(hid_t pid_in, const std::string& path_in)
+		Node(hid_t pid_in, std::string  path_in)
 				: ID(-1),
 				  pid(pid_in),
-				  path(path_in){
+				  path(std::move(path_in)){
 			//cout<<"creating "<<path<<endl;
 		}
 
