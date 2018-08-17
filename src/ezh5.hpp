@@ -166,7 +166,7 @@ namespace ezh5{
 		hsize_t dims[1];
 		dims[0] = vec.size();
 		//std::cout<<dsname<<std::endl;
-		hid_t dp_id = H5Screate_simple(1, dims, NULL);
+		hid_t dp_id = H5Screate_simple(1, dims, nullptr);
 		assert(dp_id>=0);
 		hid_t ds_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dp_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		assert(ds_id>=0);
@@ -189,7 +189,7 @@ namespace ezh5{
 		hsize_t dims[1];
 		dims[0] = arr.size();
 		//std::cout<<dsname<<std::endl;
-		hid_t dp_id = H5Screate_simple(1, dims, NULL);
+		hid_t dp_id = H5Screate_simple(1, dims, nullptr);
 		assert(dp_id>=0);
 		hid_t ds_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dp_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		assert(ds_id>=0);
@@ -421,7 +421,7 @@ namespace ezh5{
 				}else if (is_exist==false) {
 					hsize_t dims[1];
 					dims[0] = vec.size();
-					hid_t dataspace_id = H5Screate_simple(1, dims, NULL);
+					hid_t dataspace_id = H5Screate_simple(1, dims, nullptr);
 					assert(dataspace_id >= 0);
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
@@ -448,7 +448,7 @@ namespace ezh5{
 				}else if (is_exist==false) {
 					hsize_t dims[1];
 					dims[0] = arr.size();
-					hid_t dataspace_id = H5Screate_simple(1, dims, NULL);
+					hid_t dataspace_id = H5Screate_simple(1, dims, nullptr);
 					assert(dataspace_id >= 0);
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
@@ -566,7 +566,7 @@ namespace ezh5{
                hsize_t dims[2];
                dims[0] = mat.rows();
                dims[1] = mat.cols();
-               hid_t dataspace_id = H5Screate_simple(2, dims, NULL);
+               hid_t dataspace_id = H5Screate_simple(2, dims, nullptr);
                assert(dataspace_id>=0);
                this->id = H5Dcreate(this->pid, path.c_str(), TypeMem<_Scalar>::id,
 				    dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -716,7 +716,7 @@ namespace ezh5 {
         hid_t datatype_id = H5Dget_type(dataset_id);
         hid_t dataspace_id = H5Dget_space(dataset_id);
         hsize_t dims[1];
-        int err = H5Sget_simple_extent_dims(dataspace_id,dims,NULL);
+        int err = H5Sget_simple_extent_dims(dataspace_id,dims,nullptr);
         assert(err>=0);
         if (dims[0]>0) {
             vec.resize(dims[0]);
