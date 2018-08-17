@@ -330,7 +330,7 @@ namespace ezh5{
 		ID(): id(-1){}
 		ID(hid_t id_in) : id(id_in){}
 
-		~ID(){}
+		~ID()= default;
 
 	};
 
@@ -338,7 +338,7 @@ namespace ezh5{
 	class Node :public ID{
 	public:
 
-		Node(){}
+		Node()= default;
 
 		Node(hid_t pid_in, const std::string& path_in)
 				: ID(-1),
