@@ -348,7 +348,7 @@ namespace ezh5{
 		}
 
 
-		Node& operator()(const std::string& path){
+		Node& operator()(const std::string& /*path*/){
 			return *this;
 		}
 
@@ -405,6 +405,7 @@ namespace ezh5{
 					this->id = -1;   // TODO: why keep on setting this->id here, not necessary
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
+          // TODO: open dataset and rewrite
 				}
 			}
 			return *this;
@@ -635,6 +636,8 @@ namespace ezh5{
 			this->id = H5Dcreate(pid, path.c_str(), type_in_mem, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		}
 		hid_t error_id = H5Dwrite(id, type_in_mem, H5S_ALL, H5S_ALL, H5P_DEFAULT, &str);
+		assert(error_id>=0);
+
 		H5Dclose(this->id);
 		this->id = -1;
 		if (dataspace_id != -1) {H5Sclose(dataspace_id);}
@@ -713,10 +716,12 @@ namespace ezh5 {
         hid_t datatype_id = H5Dget_type(dataset_id);
         hid_t dataspace_id = H5Dget_space(dataset_id);
         hsize_t dims[1];
-        int err = H5Sget_simple_extent_dims(dataspace_id,dims,NULL); assert(err>=0);
+        int err = H5Sget_simple_extent_dims(dataspace_id,dims,NULL);
+        assert(err>=0);
         if (dims[0]>0) {
             vec.resize(dims[0]);
             hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec[0]);
+            assert(error_id>=0);
         }
     }
 
@@ -732,6 +737,7 @@ namespace ezh5 {
         if (dims[0]>0) {
             vec.resize(dims[0]);
             hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec(0));
+            assert(error_id>=0);
         }
     }
 
