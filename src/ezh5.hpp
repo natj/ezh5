@@ -585,8 +585,8 @@ namespace ezh5{
 
 #ifdef EIGEN_BLOCK_H
 		template<typename XprType, int BlockRows, int BlockCols, bool InnerPanel>
-        Node& operator=(const Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>& mat){
-            hid_t dataspace_id = -1;
+        Node& operator=(const Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>& /*mat*/){
+            //hid_t dataspace_id = -1;
             typedef typename XprType::Scalar Scalar;
             Scalar z (0.);
 //            if(this->id == -1){
