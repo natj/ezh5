@@ -130,8 +130,11 @@ namespace ezh5{
 		hid_t dataspace_id = H5Screate(H5S_SCALAR);
 		hid_t dataset_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		hid_t error_id = H5Dwrite(dataset_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
-		H5Dclose(dataset_id);
-		H5Sclose(dataspace_id);
+        //assert(error_id >=0);
+		hid_t error_id2 = H5Dclose(dataset_id);
+        //assert(error_id2>=0);
+		hid_t error_id3 = H5Sclose(dataspace_id);
+        //assert(error_id3>=0);
 		return error_id;
 	}
 
@@ -269,10 +272,14 @@ namespace ezh5{
 //---------- read function    
 	template<typename T>
 	hid_t read(const hid_t loc_id, const char* dsname, T* p_buf){
+        //std::cout<<"read() loc_id:" << loc_id << " dsname:" << dsname << "\n";
 		hid_t dataset_id = H5Dopen2(loc_id, dsname, H5P_DEFAULT);
 		hid_t datatype_id = H5Dget_type(dataset_id);
 		hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, p_buf);
-		H5Dclose(dataset_id);
+        assert(error_id>=0);
+
+		hid_t error_id2 = H5Dclose(dataset_id);
+        assert(error_id2>=0);
 		return error_id;
 	}
 
@@ -692,11 +699,12 @@ namespace ezh5{
 #include <iostream>
 namespace ezh5 {
 	inline std::string& operator<<(std::string& str, ezh5::Node& node){ // TODO: doesn't work, maybe because the file string type is H5T_S_C
-        hid_t dataset_id = H5Dopen2(node.pid, node.path.c_str(), H5P_DEFAULT); assert(dataset_id>=0);
+        hid_t dataset_id = H5Dopen2(node.pid, node.path.c_str(), H5P_DEFAULT); 
+        assert(dataset_id>=0);
         hid_t datatype_id = H5Dget_type(dataset_id); assert(datatype_id>=0);
         std::size_t sdim = H5Tget_size(datatype_id);
         str.resize(sdim);
-        std::cout<<sdim<<std::endl;
+        //std::cout<<sdim<<std::endl;
         hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &str[0]);
         assert(error_id>=0);
         H5Dclose(dataset_id);
@@ -706,7 +714,8 @@ namespace ezh5 {
 
     template<typename T>
     typename ezh5::trait::enable_if<trait::is_scalar<T>::value, T>::type& operator<<(T& data, const ezh5::Node& node){
-        ezh5::read(node.pid, node.path.c_str(), &data);
+        hid_t error_id = ezh5::read(node.pid, node.path.c_str(), &data);
+        assert(error_id>=0);
         return data;
     }
 
@@ -717,7 +726,7 @@ namespace ezh5 {
         hid_t datatype_id = H5Dget_type(dataset_id);
         hid_t dataspace_id = H5Dget_space(dataset_id);
         hsize_t dims[1];
-        int err = H5Sget_simple_extent_dims(dataspace_id,dims,nullptr);
+        hid_t err = H5Sget_simple_extent_dims(dataspace_id,dims,nullptr);
         assert(err>=0);
         if (dims[0]>0) {
             vec.resize(dims[0]);
