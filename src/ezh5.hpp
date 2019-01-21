@@ -130,11 +130,14 @@ namespace ezh5{
 		hid_t dataspace_id = H5Screate(H5S_SCALAR);
 		hid_t dataset_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		hid_t error_id = H5Dwrite(dataset_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
-        //assert(error_id >=0);
+    //assert(error_id >=0);
+
 		hid_t error_id2 = H5Dclose(dataset_id);
-        //assert(error_id2>=0);
+    assert(error_id2>=0);
+
 		hid_t error_id3 = H5Sclose(dataspace_id);
-        //assert(error_id3>=0);
+    assert(error_id3>=0);
+
 		return error_id;
 	}
 
