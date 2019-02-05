@@ -7,7 +7,6 @@
  *
  */
 
-
 #ifndef EZH5_H
 #define EZH5_H
 
@@ -89,15 +88,15 @@ namespace ezh5{
 			static const bool value = true;
 		};
 
-		template<>
-		struct is_scalar<std::complex<float> >{
-			static const bool value = true;
-		};
+		//template<>
+		//struct is_scalar<std::complex<float> >{
+		//	static const bool value = true;
+		//};
 
-		template<>
-		struct is_scalar<std::complex<double> >{
-			static const bool value = true;
-		};
+		//template<>
+		//struct is_scalar<std::complex<double> >{
+		//	static const bool value = true;
+		//};
 	}//end name
 
 	template<typename T>
@@ -106,14 +105,14 @@ namespace ezh5{
 	};
 
 	// define complex number datatype layout
-	template<typename T>
-	struct TypeMem<std::complex<T> >{
-		static hid_t id;
-		TypeMem(){
-			H5Tinsert(id, "r", 0, TypeMem<T>::id);  // the name 'r' is to be compatible with h5py
-			H5Tinsert(id, "i", sizeof(T), TypeMem<T>::id); // TODO: use HOFFSET
-		}
-	};
+	//template<typename T>
+	//struct TypeMem<std::complex<T> >{
+	//	static hid_t id;
+	//	TypeMem(){
+	//		H5Tinsert(id, "r", 0, TypeMem<T>::id);  // the name 'r' is to be compatible with h5py
+	//		H5Tinsert(id, "i", sizeof(T), TypeMem<T>::id); // TODO: use HOFFSET
+	//	}
+	//};
 
 	// template<>
 	// struct TypeMem<const char*>{
@@ -309,26 +308,48 @@ namespace ezh5{
 
 namespace ezh5{
 
+  namespace internal {
+    template<typename T> hid_t get_h5_native_type(const T& ){ return -1;};
+    template<> inline hid_t get_h5_native_type(const double             &) { return H5T_NATIVE_DOUBLE;};
+    template<> inline hid_t get_h5_native_type(const float              &) { return H5T_NATIVE_FLOAT;};
+    template<> inline hid_t get_h5_native_type(const int                &) { return H5T_NATIVE_INT;};
+    template<> inline hid_t get_h5_native_type(const long               &) { return H5T_NATIVE_LONG;};
+    template<> inline hid_t get_h5_native_type(const unsigned int       &) { return H5T_NATIVE_UINT;};
+    template<> inline hid_t get_h5_native_type(const unsigned long      &) { return H5T_NATIVE_ULONG;};
+    template<> inline hid_t get_h5_native_type(const unsigned long long &) { return H5T_NATIVE_ULLONG;};
+
+	  template<> inline hid_t get_h5_native_type(const std::complex<float>& ) {
+      return H5Tcreate(H5T_COMPOUND, sizeof(std::complex<float>));  // create compound datatype
+    };
+
+	  template<> inline hid_t get_h5_native_type(const std::complex<double>& ) {
+      return H5Tcreate(H5T_COMPOUND, sizeof(std::complex<double>));  // create compound datatype
+    };
+
+
+  }
 	// definition of class static variable
-	template<> hid_t TypeMem<double>::id = H5T_NATIVE_DOUBLE;
-	template<> hid_t TypeMem<float>::id = H5T_NATIVE_FLOAT;
-	template<> hid_t TypeMem<int>::id = H5T_NATIVE_INT;
-	template<> hid_t TypeMem<long>::id = H5T_NATIVE_LONG;
-	template<> hid_t TypeMem<unsigned int>::id = H5T_NATIVE_UINT;
-	template<> hid_t TypeMem<unsigned long>::id = H5T_NATIVE_ULONG;
-	template<> hid_t TypeMem<unsigned long long>::id = H5T_NATIVE_ULLONG;
+  template<typename T> hid_t TypeMem<T>::id = internal::get_h5_native_type<T>( T(0) );
+
+	//template<> hid_t TypeMem<double>::id = H5T_NATIVE_DOUBLE;
+	//template<> hid_t TypeMem<float>::id = H5T_NATIVE_FLOAT;
+	//template<> hid_t TypeMem<int>::id = H5T_NATIVE_INT;
+	//template<> hid_t TypeMem<long>::id = H5T_NATIVE_LONG;
+	//template<> hid_t TypeMem<unsigned int>::id = H5T_NATIVE_UINT;
+	//template<> hid_t TypeMem<unsigned long>::id = H5T_NATIVE_ULONG;
+	//template<> hid_t TypeMem<unsigned long long>::id = H5T_NATIVE_ULLONG;
 
 	// hid_t TypeMem<const char*>::id =  H5Tcopy(H5T_C_S1);
 
-	template<> hid_t TypeMem<std::complex<float> >::id = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<float>));  // create compound datatype
-	template<> hid_t TypeMem<std::complex<double> >::id = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<double>));
+	//template<> hid_t TypeMem<std::complex<float> >::id = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<float>));  // create compound datatype
+	//template<> hid_t TypeMem<std::complex<double> >::id = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<double>));
 	// TODO: why I need specification, instead of defining follow
 	//template<typename T>
 	//hid_t TypeMem<std::complex<T> >::id = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<T>));
 
 
-	TypeMem<std::complex<float> > obj_to_run_constructor_float;  // to add LAYOUT (STRUCTURE) to compound datatype
-	TypeMem<std::complex<double> > obj_to_run_constructor_double;
+	//TypeMem<std::complex<float> > obj_to_run_constructor_float;  // to add LAYOUT (STRUCTURE) to compound datatype
+	//TypeMem<std::complex<double> > obj_to_run_constructor_double;
 	// TypeMem<char*> obj_to_run_constructor_charp;
 
 }
