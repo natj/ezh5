@@ -711,7 +711,9 @@ namespace ezh5{
 
 		~File(){
 			if (__auto_close && this->id !=-1) {
-				H5Fclose(this->id);
+				hid_t error_id = H5Fclose(this->id);
+        assert(error_id >= 0);
+        //std::cout << "closing id:" << id << " eid " << error_id << "\n";
 			}
 			this->id = -1;  // so that ~Node will not try to close it again
 		}
