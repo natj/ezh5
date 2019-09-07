@@ -278,10 +278,10 @@ namespace ezh5{
 		hid_t dataset_id = H5Dopen2(loc_id, dsname, H5P_DEFAULT);
 		hid_t datatype_id = H5Dget_type(dataset_id);
 		hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, p_buf);
-        assert(error_id>=0);
+    assert(error_id>=0);
 
 		hid_t error_id2 = H5Dclose(dataset_id);
-        assert(error_id2>=0);
+    assert(error_id2>=0);
 		return error_id;
 	}
 
@@ -640,13 +640,13 @@ namespace ezh5{
 		Node& operator=(const char* str);
 		Node& operator=(const std::string& str);
 
-
 		~Node(){
 			if(this->id>0){
 				//cout<<"closing "<<path<<endl;
 				H5Gclose(this->id);
 				this->id = -1;
 			}
+
 		}
 
 	public:
@@ -710,11 +710,38 @@ namespace ezh5{
 		}
 
 		~File(){
+
 			if (__auto_close && this->id !=-1) {
 				hid_t error_id = H5Fclose(this->id);
         assert(error_id >= 0);
         //std::cout << "closing id:" << id << " eid " << error_id << "\n";
+
+        // check that nothing is left open
+        //ssize_t norphans; 
+        //norphans = H5Fget_obj_count(this->id, H5F_OBJ_ALL); 
+        //if (norphans > 1) { /* expect 1 for the file we have not closed */ 
+        //  std::cout << "closing file and checking that it is truly closed...\n";
+        //  int i; 
+        //  H5O_info_t info; 
+        //  char name[64]; 
+        //  hid_t* objects = (hid_t*) calloc(norphans, sizeof(hid_t)); 
+
+        //  H5Fget_obj_ids(this->id, H5F_OBJ_ALL, -1, objects); 
+        //  for (i=0; i<norphans; i++) { 
+        //    H5Oget_info(objects[i], &info); 
+        //    H5Iget_name(objects[i], name, 64); 
+        //    printf("%d of %zd things still open: %lld with name %s of type %d \n", 
+        //          i, norphans, objects[i], name, info.type); 
+
+        //    //hid_t errid = H5Oclose(objects[i]);
+        //    //assert(errid >= 0);
+        //  } 
+        //  free(objects); 
+        //  std::cout << "...yep!\n";
+        //} 
+
 			}
+
 			this->id = -1;  // so that ~Node will not try to close it again
 		}
 	private:
