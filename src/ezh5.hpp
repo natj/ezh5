@@ -359,7 +359,7 @@ namespace ezh5{
 	class ID { // the base class for Node
 	public:
 		hid_t id{-1};
-		ID() {}
+		ID() = default;
 		ID(hid_t id_in) : id(id_in){}
 
 		~ID()= default;
