@@ -309,20 +309,20 @@ namespace ezh5{
 namespace ezh5{
 
   namespace internal {
-    template<typename T> hid_t get_h5_native_type(const T& ){ return -1;}
-    template<> inline hid_t get_h5_native_type(const double             &) { return H5T_NATIVE_DOUBLE;}
-    template<> inline hid_t get_h5_native_type(const float              &) { return H5T_NATIVE_FLOAT;}
-    template<> inline hid_t get_h5_native_type(const int                &) { return H5T_NATIVE_INT;}
-    template<> inline hid_t get_h5_native_type(const long               &) { return H5T_NATIVE_LONG;}
-    template<> inline hid_t get_h5_native_type(const unsigned int       &) { return H5T_NATIVE_UINT;}
-    template<> inline hid_t get_h5_native_type(const unsigned long      &) { return H5T_NATIVE_ULONG;}
-    template<> inline hid_t get_h5_native_type(const unsigned long long &) { return H5T_NATIVE_ULLONG;}
+    template<typename T> hid_t get_h5_native_type(const T&  /*unused*/){ return -1;}
+    template<> inline hid_t get_h5_native_type(const double             & /*unused*/) { return H5T_NATIVE_DOUBLE;}
+    template<> inline hid_t get_h5_native_type(const float              & /*unused*/) { return H5T_NATIVE_FLOAT;}
+    template<> inline hid_t get_h5_native_type(const int                & /*unused*/) { return H5T_NATIVE_INT;}
+    template<> inline hid_t get_h5_native_type(const long               & /*unused*/) { return H5T_NATIVE_LONG;}
+    template<> inline hid_t get_h5_native_type(const unsigned int       & /*unused*/) { return H5T_NATIVE_UINT;}
+    template<> inline hid_t get_h5_native_type(const unsigned long      & /*unused*/) { return H5T_NATIVE_ULONG;}
+    template<> inline hid_t get_h5_native_type(const unsigned long long & /*unused*/) { return H5T_NATIVE_ULLONG;}
 
-	  template<> inline hid_t get_h5_native_type(const std::complex<float>& ) {
+	  template<> inline hid_t get_h5_native_type(const std::complex<float>&  /*unused*/) {
       return H5Tcreate(H5T_COMPOUND, sizeof(std::complex<float>));  // create compound datatype
     }
 
-	  template<> inline hid_t get_h5_native_type(const std::complex<double>& ) {
+	  template<> inline hid_t get_h5_native_type(const std::complex<double>&  /*unused*/) {
       return H5Tcreate(H5T_COMPOUND, sizeof(std::complex<double>));  // create compound datatype
     }
 
