@@ -44,7 +44,7 @@ namespace ezh5{
 
 		template<typename T>
 		struct enable_if<true, T>{
-			typedef T type;
+			using type = T;
 		};
 
 		// for function operator=(T)
@@ -592,7 +592,7 @@ namespace ezh5{
 #ifdef EIGEN_EIGENBASE_H
 		template<typename Derived>
         Node& operator=(const Eigen::EigenBase<Derived>& mat){
-	    typedef typename Derived::Scalar _Scalar;
+	    using _Scalar = typename Derived::Scalar;
             hid_t dataspace_id = -1;
            if(this->id == -1){
                hsize_t dims[2];
@@ -618,7 +618,7 @@ namespace ezh5{
 		template<typename XprType, int BlockRows, int BlockCols, bool InnerPanel>
         Node& operator=(const Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>& /*mat*/){
             //hid_t dataspace_id = -1;
-            typedef typename XprType::Scalar Scalar;
+            using Scalar = typename XprType::Scalar;
             Scalar z (0.);
 //            if(this->id == -1){
 //                hsize_t dims[2];
