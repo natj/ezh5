@@ -132,10 +132,10 @@ namespace ezh5{
     //assert(error_id >=0);
 
 		hid_t error_id2 = H5Dclose(dataset_id);
-    assert(error_id2>=0);
+        assert(error_id2>=0);
 
 		hid_t error_id3 = H5Sclose(dataspace_id);
-    assert(error_id3>=0);
+        assert(error_id3>=0);
 
 		return error_id;
 	}
@@ -174,12 +174,20 @@ namespace ezh5{
 		//std::cout<<dsname<<std::endl;
 		hid_t dp_id = H5Screate_simple(1, dims, nullptr);
 		assert(dp_id>=0);
+
 		hid_t ds_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dp_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		assert(ds_id>=0);
-		hid_t err_id = H5Dwrite(ds_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec[0]);
-		H5Dclose(ds_id);
-		H5Sclose(dp_id);
-		return err_id;
+
+		hid_t error_id = H5Dwrite(ds_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec[0]);
+        assert(error_id >= 0);
+
+		error_id = H5Dclose(ds_id);
+        assert(error_id >= 0);
+
+		error_id = H5Sclose(dp_id);
+        assert(error_id >= 0);
+
+		return error_id; //originall H5Dwrite id
 	}
     
 	/// string dsname
@@ -197,11 +205,19 @@ namespace ezh5{
 		//std::cout<<dsname<<std::endl;
 		hid_t dp_id = H5Screate_simple(1, dims, nullptr);
 		assert(dp_id>=0);
+
 		hid_t ds_id = H5Dcreate(loc_id, dsname, TypeMem<T>::id, dp_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		assert(ds_id>=0);
+
 		hid_t err_id = H5Dwrite(ds_id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &arr[0]);
-		H5Dclose(ds_id);
-		H5Sclose(dp_id);
+		//assert(err_id>=0);
+
+		hid_t error_id = H5Dclose(ds_id);
+		assert(error_id>=0);
+
+		error_id = H5Sclose(dp_id);
+		assert(error_id>=0);
+
 		return err_id;
 	}
     
@@ -278,10 +294,11 @@ namespace ezh5{
 		hid_t dataset_id = H5Dopen2(loc_id, dsname, H5P_DEFAULT);
 		hid_t datatype_id = H5Dget_type(dataset_id);
 		hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, p_buf);
-    assert(error_id>=0);
+        assert(error_id>=0);
 
 		hid_t error_id2 = H5Dclose(dataset_id);
-    assert(error_id2>=0);
+        assert(error_id2>=0);
+
 		return error_id;
 	}
 
@@ -375,8 +392,9 @@ namespace ezh5{
 		Node(hid_t pid_in, std::string  path_in)
 				: ID(-1),
 				  pid(pid_in),
-				  path(std::move(path_in)){
-			//cout<<"creating "<<path<<endl;
+				  path(std::move(path_in))
+        {
+            //std::cout<<"creating "<<path<<std::endl;
 		}
 
 
@@ -386,16 +404,47 @@ namespace ezh5{
 
 
 		Node operator[](const std::string& path_more){
+
+            // assert that path is not empty
+            //assert(!path.empty());
+            //if(path.empty()) {
+            //    std::cout << "Node [] path empty:" << path << " pm:" << path_more << " pid:" << pid << std::endl;
+
+			//	this->id = H5Gcreate2(pid, path_more.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            //    assert(this->id >= 0);
+
+			//    return Node(this->id, path_more);
+            //}
+
 			if(this->id==-1){// in lazy
 				htri_t is_exist = H5Lexists(pid, path.c_str(), H5P_DEFAULT);
+
+				//if (is_exist>0){
+				//	this->id = H5Gopen(pid, path.c_str(), H5P_DEFAULT);
+                //} else if (is_exist==0){
+				//	this->id = H5Gcreate2(pid, path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                //} else if (is_exist<0){
+				//    htri_t is_exist = H5Lexists(pid, path_more.c_str(), H5P_DEFAULT);
+                //    std::cout << "failure mode: " << is_exist << std::endl;
+				//	this->id = H5Gcreate2(pid, path_more.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                //    std::cout << "id" << id << std::endl;
+                //}
+
 				if (is_exist<0){
-					assert(false);
-				}else if (!static_cast<bool>(is_exist)){
+				    htri_t is_exist = H5Lexists(pid, path_more.c_str(), H5P_DEFAULT);
+                    std::cout << "mode is" << is_exist << " p:" << path << " pm:" << path_more << std::endl;
+					//assert(false);
+				     //H5Ldelete(pid, path.c_str(), H5P_DEFAULT);
+                       
+					 this->id = H5Gcreate2(pid, path_more.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+				} else if (!static_cast<bool>(is_exist)){
 					this->id = H5Gcreate2(pid, path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-				}else{
+				} else{
 					this->id = H5Gopen(pid, path.c_str(), H5P_DEFAULT);
 				}
 			} // TODO: else open dataset, read, and return the value
+
 			assert(this->id>=0);
 			return Node(this->id, path_more);
 		}
@@ -430,14 +479,20 @@ namespace ezh5{
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
 					assert(this->id>=0);
+
 					hid_t error_id = H5Dwrite(id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val);
 					assert(error_id>=0);
-					H5Dclose(this->id);
-					H5Sclose(dataspace_id);
+
+					error_id = H5Dclose(this->id);
+		            assert(error_id>=0);
+
+					error_id = H5Sclose(dataspace_id);
+		            assert(error_id>=0);
+
 					this->id = -1;   // TODO: why keep on setting this->id here, not necessary
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
-          // TODO: open dataset and rewrite
+                    // TODO: open dataset and rewrite
 				}
 			}
 			return *this;
@@ -458,10 +513,16 @@ namespace ezh5{
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
 					assert(this->id >=0);
+
 					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec[0]);
 					assert(error_id>=0);
-					H5Dclose(this->id);
-					H5Sclose(dataspace_id);
+
+					error_id = H5Dclose(this->id);
+		            assert(error_id>=0);
+
+					error_id = H5Sclose(dataspace_id);
+		            assert(error_id>=0);
+
 					this->id = -1;
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
@@ -485,10 +546,16 @@ namespace ezh5{
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
 					assert(this->id >=0);
+
 					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &arr[0]);
 					assert(error_id>=0);
-					H5Dclose(this->id);
-					H5Sclose(dataspace_id);
+
+					error_id = H5Dclose(this->id);
+		            assert(error_id>=0);
+
+					error_id = H5Sclose(dataspace_id);
+		            assert(error_id>=0);
+
 					this->id = -1;
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
@@ -513,10 +580,16 @@ namespace ezh5{
 					this->id = H5Dcreate(pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
 										 H5P_DEFAULT);
 					assert(this->id>=0);
+
 					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vec(0));
 					assert(error_id>=0);
-					H5Dclose(this->id);
-					H5Sclose(dataspace_id);
+
+					error_id = H5Dclose(this->id);
+		            assert(error_id>=0);
+
+					error_id = H5Sclose(dataspace_id);
+		            assert(error_id>=0);
+
 					this->id = -1;
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
@@ -540,15 +613,22 @@ namespace ezh5{
 					hsize_t dims[2];
 					dims[0] = mat.size1();
 					dims[1] = mat.size2();
+
 					hid_t dataspace_id = H5Screate_simple(2, dims, NULL);
 					assert(dataspace_id >= 0);
+
 					this->id = H5Dcreate(this->pid, path.c_str(), TypeMem<T>::id, dataspace_id, H5P_DEFAULT,
 										 H5P_DEFAULT, H5P_DEFAULT);
 					hid_t error_id = H5Dwrite(this->id, TypeMem<T>::id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &mat(0,0));
 					assert(error_id>=0);
-					H5Dclose(this->id);
+
+					error_id = H5Dclose(this->id);
+					assert(error_id>=0);
 					this->id = -1;
-					H5Sclose(dataspace_id);
+
+					error_id = H5Sclose(dataspace_id);
+					assert(error_id>=0);
+
 				}else{
 					std::cout<<"dataset "<<path<<" already exists!"<<std::endl;
 				}
@@ -642,11 +722,14 @@ namespace ezh5{
 
 		~Node(){
 			if(this->id>0){
-				//cout<<"closing "<<path<<endl;
-				H5Gclose(this->id);
+                //FIXME
+                std::cout<<"closing Node Group path:"<<path<<std::endl;
+
+				hid_t error_id = H5Gclose(this->id);
+                assert(error_id >= 0);
+
 				this->id = -1;
 			}
-
 		}
 
 	public:
@@ -672,9 +755,15 @@ namespace ezh5{
 
 		H5Dclose(this->id);
 		this->id = -1;
+
 		if (dataspace_id != -1) {H5Sclose(dataspace_id);}
-		H5Tclose(type_in_file);
-		H5Tclose(type_in_mem);
+
+		error_id = H5Tclose(type_in_file);
+        assert(error_id >= 0);
+
+		error_id = H5Tclose(type_in_mem);
+        assert(error_id >= 0);
+
 		return *this;
 	}
 
@@ -693,10 +782,20 @@ namespace ezh5{
 		// TODO: implement open if exists, create if not
 		File(const std::string& path, unsigned flags)
 				: __auto_close(true){
+
+
 			if(flags==H5F_ACC_RDWR || flags==H5F_ACC_RDONLY){
-				this->id = H5Fopen(path.c_str(), flags, H5P_DEFAULT);
+				this->id = H5Fopen(path.c_str(), flags | H5F_ACC_DEBUG, H5P_DEFAULT);
+                std::cout << "opening file:" << path << " id" << this->id << std::endl;
+                assert(this->id >= 0);
+
 			}else if (flags==H5F_ACC_TRUNC || flags==H5F_ACC_EXCL){
-				this->id = H5Fcreate(path.c_str(), flags, H5P_DEFAULT, H5P_DEFAULT);
+                //does file exist?
+
+				this->id = H5Fcreate(path.c_str(), flags | H5F_ACC_DEBUG, H5P_DEFAULT, H5P_DEFAULT);
+                std::cout << "creating file:" << path << " id" << this->id << std::endl;
+                assert(this->id >= 0);
+
 			}else{
 				assert(!"unknow file access mode");
 			}
@@ -709,45 +808,68 @@ namespace ezh5{
 			this->id = fid;
 		}
 
+        /// file closing
 		~File(){
-
 			if (__auto_close && this->id !=-1) {
+
+                // clear link cache
+                H5Fclear_elink_file_cache(this->id);
+
 				hid_t error_id = H5Fclose(this->id);
-        assert(error_id >= 0);
-        //std::cout << "closing id:" << id << " eid " << error_id << "\n";
+                assert(error_id >= 0);
 
-        // check that nothing is left open
-        //ssize_t norphans; 
-        //norphans = H5Fget_obj_count(this->id, H5F_OBJ_ALL); 
-        //if (norphans > 1) { /* expect 1 for the file we have not closed */ 
-        //  std::cout << "closing file and checking that it is truly closed...\n";
-        //  int i; 
-        //  H5O_info_t info; 
-        //  char name[64]; 
-        //  hid_t* objects = (hid_t*) calloc(norphans, sizeof(hid_t)); 
-
-        //  H5Fget_obj_ids(this->id, H5F_OBJ_ALL, -1, objects); 
-        //  for (i=0; i<norphans; i++) { 
-        //    H5Oget_info(objects[i], &info); 
-        //    H5Iget_name(objects[i], name, 64); 
-        //    printf("%d of %zd things still open: %lld with name %s of type %d \n", 
-        //          i, norphans, objects[i], name, info.type); 
-
-        //    //hid_t errid = H5Oclose(objects[i]);
-        //    //assert(errid >= 0);
-        //  } 
-        //  free(objects); 
-        //  std::cout << "...yep!\n";
-        //} 
-
+                std::cout << "closing File id:" << this->id << " eid " << error_id << "\n";
 			}
+
+            //check that nothing is left open
+            //ssize_t norphans; 
+            //norphans = H5Fget_obj_count(this->id, H5F_OBJ_ALL); 
+            //std::cout << "there are orphans:" << norphans << "\n";
+
+            //if (norphans > 1) { /* expect 1 for the file we have not closed */ 
+
+            //  std::cout << "closing file and checking that it is truly closed...\n";
+            //  H5O_info_t info; 
+            //  char name[64]; 
+            //  hid_t* objects = (hid_t*) calloc(norphans, sizeof(hid_t)); 
+
+            //  H5Fget_obj_ids(this->id, H5F_OBJ_ALL, -1, objects); 
+
+            //  for (int i=0; i<norphans; i++) { 
+            //    // herr_t H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields);
+
+            //    H5Oget_info(objects[i], &info, H5O_INFO_ALL); 
+            //    H5Iget_name(objects[i], name, 64); 
+            //    printf("%d of %zd things still open: %ld with name %s of type %d \n", 
+            //          i, norphans, objects[i], name, info.type); 
+
+            //    hid_t errid = H5Oclose(objects[i]);
+            //    assert(errid >= 0);
+            //  } 
+            //  free(objects); 
+            //  std::cout << "...yep!\n";
+            //} 
 
 			this->id = -1;  // so that ~Node will not try to close it again
 		}
 	private:
 		bool __auto_close;
 	};
-}
+
+
+  /// shutdown and flush everything
+  //void close_all(){
+  //    //hid_t error_id = H5close();
+  //    //hid_t error_id = H5garbage_collect();
+  //    //assert(error_id >= 0);
+  //    H5close();
+  //}
+
+} //end of ns ezh5
+
+
+
+
 
 #include <iostream>
 namespace ezh5 {
@@ -760,7 +882,9 @@ namespace ezh5 {
         //std::cout<<sdim<<std::endl;
         hid_t error_id = H5Dread(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &str[0]);
         assert(error_id>=0);
-        H5Dclose(dataset_id);
+
+        error_id = H5Dclose(dataset_id);
+        assert(error_id >= 0);
 
 		return str;
 	}
